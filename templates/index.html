@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Locator</title>
+    <style>
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom, #fdd0d0, #e5e5e5); /* Gradient from light pink to light grey */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 70px;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px auto;
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            display: flex;
+            margin-top: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+            text-align: left;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Locator</h1>
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <label for="image-input">Upload Image</label>
+            <input type="file" id="image-input" name="image" accept="image/*" required>
+            <button type="submit">Locate Product</button>
+        </form>
+        <img id="preview-image" alt="Uploaded Image">
+        <div id="predicted-stores">
+            <h2>Predicted Stores:</h2>
+            <ul id="store-list"></ul>
+            <div id="buttons-group" style="display: none;">
+                <button id="purchase-online-button">Purchase Online</button>
+                <button id="google-maps-button">Go to Google Maps</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const storeList = document.getElementById('store-list');
+        const buttonsContainer = document.getElementById('buttons-group');
+        const purchaseOnlineButton = document.getElementById('purchase-online-button');
+        const googleMapsButton = document.getElementById('google-maps-button');
+        const previewImage = document.getElementById('preview-image');
+        
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const predictedStores = data.predicted_stores;
+
+                // Clear previous predictions
+                storeList.innerHTML = '';
+
+                // Display predicted store names
+                for (const store of predictedStores) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = store;
+                    storeList.appendChild(listItem);
+                }
+                // Show buttons after predictions
+                buttonsContainer.style.display = 'block';
+
+                 // Update the preview image with the uploaded image
+                previewImage.src = URL.createObjectURL(formData.get('image'));
+
+                googleMapsButton.addEventListener('click', () => {
+                // Add logic to handle the "Go to Google Maps" button click
+                // For example, open Google Maps in a new tab with a specific location.
+                window.open('https://www.google.com/maps', '_blank');
+                });
+
+                // Add click event listeners to the buttons
+                purchaseOnlineButton.addEventListener('click', () => {
+                // Add logic to handle the "Purchase Online" button click
+                // For example, redirect the user to an online store.
+                });
+
+                
+            }
+        });
+    </script>
+</body>
+</html>
